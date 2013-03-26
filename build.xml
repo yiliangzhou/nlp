@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     Mar 21, 2013 5:56:05 PM                                                        
+
+     Natural Language Processing Maximum Entropy Model    
+     How to train an MaxEnt model for noun group chunking.
+                   
+     liangzhou                                                                
+     ====================================================================== -->
+<project name="Natural Language Processing Maximum Entropy " 
+		basedir="." default="build">
+	
+    <description>
+            In this project, we train a MaxEnt model for noun group chunking
+    			using trainning data from UPenn.
+    </description>
+	
+    <!-- ================================= 
+          Set gloabl properties for this build              
+         ================================= -->
+	<property name="src.dir" value="src" />
+	<property name="build.dir" value="bin" />
+	<property name="lib.dir" value="lib" />
+	<property name="config.file" value="conf/maxent.conf" />
+	<path id="project.class.path">
+          <pathelement location="${CLASSPATH}" />
+          <pathelement location="${build.dir}" />
+          <pathelement location="${lib.dir}" />
+		  <pathelement location="${lib.dir}/maxent-2.1.0.jar" />
+		  <pathelement location="${lib.dir}/trove.jar" />
+    </path> 
+	
+    <!-- ================================= 
+          target: create_dir and dir.check              
+         ================================= -->	
+    <target name="create_dir" depends="dir.check" unless="dir.exists">
+        <mkdir dir="${build.dir}" />
+    </target>
+
+    <target name="dir.check" description="check the existence of build.dir">
+          <condition property="dir.exists">
+              <available file="${build.dir}" type="dir"/>
+          </condition>
+    </target>
+	
+	
+    <!-- ================================= 
+          target: build              
+         ================================= -->
+    <target name="build" depends="create_dir" description="compile source files">
+        <javac srcdir="${src.dir}" destdir="${build.dir}" 
+               includeantruntime="false" >
+               <classpath refid="project.class.path" />
+        </javac>
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: train the Maximum Entropy Model                   
+         - - - - - - - - - - - - - - - - - -->
+    <target name="train" depends="build">
+     	
+    	    <propertyfile file="${config.file}">
+     		<entry key="mode" value="train" />
+    		</propertyfile>
+    		   	
+    		<java fork="true" classname="edu.nyu.nlp.MaxEntExperiment">
+    			<classpath refid="project.class.path" />
+    			<arg value="${config.file}" />
+    		</java>
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: test the trained Maximum Entropy Model                   
+         - - - - - - - - - - - - - - - - - -->
+    <target name="test" depends="build">
+     	<propertyfile file="${config.file}">
+     		<entry key="mode" value="test" />
+    		</propertyfile>
+    	
+    		<java fork="true" classname="edu.nyu.nlp.MaxEntExperiment">
+    			<classpath refid="project.class.path" />
+    			<arg value="${config.file}" />
+    		</java>
+    </target>
+	
+</project>
